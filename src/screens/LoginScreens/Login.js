@@ -30,8 +30,8 @@ const LoginScreen = ({navigation}) => {
   // const [baseURL, setBaseURL] = useState(null);
   const [state, setState] = useState({
     tag: 'login',
-    username: 'RC-',
-    password: '123',
+    username: '',
+    password: '',
   });
   const {
     signIn,

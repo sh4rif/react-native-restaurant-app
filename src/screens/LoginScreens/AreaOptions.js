@@ -21,15 +21,7 @@ import {MainContext} from '../../components/context';
 
 const AreaOptionsScreen = ({navigation}) => {
   const [state, setState] = useState([]);
-  const [areas, setAreas] = useState([
-    {AREA_ID: '1', AREA_DESC: 'BBQ INDOOR 1'},
-    {AREA_ID: '3', AREA_DESC: 'COFFE SHOP 1'},
-    {AREA_ID: '4', AREA_DESC: 'CHINESE 1'},
-    {AREA_ID: '5', AREA_DESC: 'MORROCAN 1'},
-    {AREA_ID: '6', AREA_DESC: 'PASTRY SHOP 1'},
-  ]);
   const [selectedArea, setSelectedArea] = useState(null);
-  const [urlState, setURLState] = useState('nothing');
 
   const {setUserArea, user, setIsLoggedIn, baseURL, setBaseURL} =
     useContext(MainContext);
@@ -50,11 +42,9 @@ const AreaOptionsScreen = ({navigation}) => {
 
   const getAreas = async () => {
     let url = baseURL;
-    // const temp  = `${url}${GET_AREAS}`
     try {
       if (!baseURL) {
         const base_url = await AsyncStorageLib.getItem(storageVarNames.url);
-        console.log('based_url stored in localstorage', base_url);
         if (!base_url) {
           navigation.navigate('URLOptionsScreen');
           return;
@@ -62,28 +52,10 @@ const AreaOptionsScreen = ({navigation}) => {
         setBaseURL(base_url);
         url = base_url;
       }
-      url = `${url}${GET_AREAS}`;
-      console.log('url is', url);
-      setURLState(url);
-
-      const {data} = await axios.get(url);
+      const {data} = await axios.get(`${url}${GET_AREAS}`);
       setState([...data]);
-      axios
-        .get('http://192.168.2.15/api2/get_areas.php')
-        .then(res => {
-          setAreas(res.data);
-        })
-        .catch(err => {
-          setAreas([
-            {AREA_ID: '1', AREA_DESC: 'BBQ INDOOR 2'},
-            {AREA_ID: '3', AREA_DESC: 'COFFE SHOP 2'},
-            {AREA_ID: '4', AREA_DESC: 'CHINESE 2'},
-            {AREA_ID: '5', AREA_DESC: 'MORROCAN 2'},
-            {AREA_ID: '6', AREA_DESC: 'PASTRY SHOP 2'},
-          ]);
-        });
     } catch (e) {
-      console.log('error while fetching areas+++', e);
+      console.log('error while fetching areas', e);
     }
   };
 
@@ -144,11 +116,10 @@ const AreaOptionsScreen = ({navigation}) => {
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={MAIN_COLOR} barStyle="light-content" />
       <View style={styles.header}>
-        {/* <Text style={styles.text_header}>Please Select An Area</Text> */}
-        <Text style={styles.text_dummy}>{urlState}</Text>
+        <Text style={styles.text_header}>Please Select An Area</Text>
+        {/* <Text>{JSON.stringify(state)}</Text> */}
       </View>
       <Animatable.View animation="fadeInUpBig" style={styles.footer}>
-        <Text style={styles.text_dummy}>{JSON.stringify(areas)}</Text>
         <FlatList
           numColumns={1}
           keyExtractor={(item, index) => item.AREA_ID}
@@ -196,11 +167,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 25,
-  },
-  text_dummy: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
   text_footer: {
     color: '#05375a',

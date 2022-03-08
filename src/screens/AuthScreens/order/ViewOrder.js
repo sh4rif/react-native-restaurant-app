@@ -22,6 +22,7 @@ import ButtonComponent from '../../../components/button';
 
 const ViewOrderScreen = ({navigation}) => {
   const [showComments, setShowComments] = useState(false);
+  const [submitted, setSubmited] = useState(false);
   const [total, setTotal] = useState({
     taxable: 0,
     non_taxable: 0,
@@ -39,6 +40,7 @@ const ViewOrderScreen = ({navigation}) => {
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', e => {
       calculateTotal(order.order);
+      setSubmited(false);
       setShowComments(false);
     });
 
@@ -46,7 +48,7 @@ const ViewOrderScreen = ({navigation}) => {
   }, [navigation, order]);
 
   const placeOrder = async () => {
-
+    setSubmited(true);
     // console.log('order is', order);
     // return;
     const orderItems = order.order.filter(o => o.qty > 0 && o.checked);
@@ -69,6 +71,7 @@ const ViewOrderScreen = ({navigation}) => {
       const {data} = await axios.post(url, orderToSumbit);
       if (data.error !== 0) {
         Alert.alert('Order', 'Order failed!, please try again');
+        setSubmited(true)
         return;
       }
 
@@ -353,15 +356,23 @@ const ViewOrderScreen = ({navigation}) => {
                 </TouchableOpacity>
               </View>
 
-              <View style={{...styles.header1, width: '50%'}}>
+              <View style={!submitted ? {...styles.header1, width: '50%'} : {...styles.disabledBG, width: '50%'}}>
                 <TouchableOpacity
                   style={styles.deleteBtn}
+                  disabled={submitted}
                   onPress={() => {
                     placeOrder(order.order);
                   }}>
-                  <Text style={{...styles.headerTxt, letterSpacing: 1}}>
-                    Place Order <Icon name="checkmark-done-outline" size={26} />
-                  </Text>
+                  {!submitted ? (
+                    <Text style={{...styles.headerTxt, letterSpacing: 1}}>
+                      Place Order{' '}
+                      <Icon name="checkmark-done-outline" size={26} />
+                    </Text>
+                  ) : (
+                    <Text style={{...styles.headerTxt, letterSpacing: 1, color: '#000'}}>
+                      Please wait...
+                    </Text>
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
@@ -386,6 +397,12 @@ const styles = StyleSheet.create({
   },
   header1: {
     backgroundColor: MAIN_COLOR,
+    paddingHorizontal: 5,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  disabledBG: {
+    backgroundColor: '#ccc',
     paddingHorizontal: 5,
     paddingVertical: 10,
     alignItems: 'center',
@@ -429,6 +446,9 @@ const styles = StyleSheet.create({
   addItems: {
     backgroundColor: SUCCESS_COLOR,
     width: '50%',
+  },
+  disableItem: {
+    backgroundColor: '#ddd',
   },
   totalRow: {fontSize: 20, fontWeight: 'bold', width: 200},
   totalTxt: {fontSize: 26, color: MAIN_COLOR},
